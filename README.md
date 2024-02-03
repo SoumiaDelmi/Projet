@@ -11,8 +11,8 @@ Développement d'une application d'un site de vente en ligne en architecturée e
 ## Cas d'utilisation
 
 ### Client :
--   Rechercher un produit
--   Consulter un produit
+-   Rechercher un produit 
+-   Consulter un produit 
 -   Ajouter un produit au panier
 -   Supprimer un article du panier
 -   Valider son panier
@@ -51,3 +51,40 @@ Il y a sept microservices :
 - Service de gestion de produit
 - Service de gestion de paiement
 - Service de gestion de commande
+
+
+## Diagramme de séquence
+
+
+
+### Client
+Consulter un produit:
+    
+```
+title Client consulter un produit
+
+Client->Produits:GET /produits/${id}
+Produits->Produits BDD: Récupérer le produit
+Produits->Client: 200 : le produit récupéré
+```
+
+<img src="ressources/ClientConsulterProduit.png"/>
+
+
+### Admin
+Supprimer un produit:
+
+```
+Admin->Produits:DELETE /produits/${id}
+Produits->Produits BDD:Supprime le produit
+Produits-->ESB:asynchrone notifie l'ESB de la suppression d'un produit
+Produits->Admin: 204 : Informe que le produit est supprimé
+ESB->Commandes: DELETE /paniers/produits/${id}
+Commandes->Commandes BDD: Supprime les produits des paniers qui doivent être supprimé
+Commandes->ESB: Confirme la suppression
+Clients->Commandes: Consulte son panier
+Commandes->Clients: Met à jours le panier avec les produits supprimés
+```
+<img src="ressources/AdminSupprimerProduit.png"/>
+
+
